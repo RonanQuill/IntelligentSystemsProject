@@ -10,12 +10,14 @@ package com.company;
 import java.util.*;
 import javax.swing.*;
 
-
-import java.util.Comparator;
-
-//0 1 2 3 4 5 6 7 8
-
 public class Main {
+
+    public JFrame jFrame = new JFrame();
+
+    //-----------------------------------------------------------------------------------------------------------
+    //Helper Classes--------------------------------------------------------------------------------------------
+    //-----------------------------------------------------------------------------------------------------------
+    //This is a helper class which conveniently stores the position of the 0/blank tile location in each node.
     class BlankTileLocation{
         public int column;
         public int row;
@@ -42,6 +44,7 @@ public class Main {
         }
     }
 
+    //This node class represents a node that A* searches
     class Node{
         public ArrayList<ArrayList<String>>  state;
         public Node parent;
@@ -52,10 +55,13 @@ public class Main {
 
         public BlankTileLocation blankTileLocation;
 
+        //Default constructor
         public Node(){
+
             blankTileLocation = new BlankTileLocation();
         }
 
+        //Copy Constructor
         public Node(Node another) {
             this.g = another.g;
             this.h = another.h;
@@ -71,6 +77,7 @@ public class Main {
             this.parent = another.parent;
         }
 
+        //Overriden functions to allow node to be used with HashSet
         @Override
         public int hashCode() {
             String hash = new String();
@@ -90,6 +97,7 @@ public class Main {
         }
     }
 
+    //This is custom comparator used to allow the node class to be used with PriorityQueue
     class LowestFSCoreComparator implements Comparator<Node>
     {
         @Override
@@ -99,83 +107,39 @@ public class Main {
         }
     }
 
-    public JFrame f;
-
-    public ArrayList<String> startState = new ArrayList<String>();
-    public ArrayList<String> endState = new ArrayList<String>();
-    public int matrixDimensions = 0;
-
     //-----------------------------------------------------------------------------------------------------------
-    //Input Functions--------------------------------------------------------------------------------------------
+    //Input Function--------------------------------------------------------------------------------------------
     //-----------------------------------------------------------------------------------------------------------
-    boolean GetStartState(){
-        String startStateRaw = JOptionPane.showInputDialog(f,"Enter Start State");
-        StringTokenizer tokenizer = new StringTokenizer(startStateRaw, " ");
+    boolean GetState(ArrayList<String> state, String inputMessage){
+        String stateRaw = JOptionPane.showInputDialog(jFrame, inputMessage);
+        StringTokenizer tokenizer = new StringTokenizer(stateRaw, " ");
 
-        if(tokenizer.countTokens() != 9){
-            System.out.println("Invalid Start State: 9 unique values are required in the range 0 -> 8. Your input was " + startStateRaw);
+        if(tokenizer.countTokens() == 9 || tokenizer.countTokens() == 16){
+            state.clear();
+
+            while(tokenizer.hasMoreTokens()){
+                String nextToken = tokenizer.nextToken();
+                if(state.contains(nextToken)){
+                    System.out.println("Invalid State: Either 9 or 15 unique values are required in the range 0 -> 8 or 0 -> 15. Your input was " + stateRaw);
+                    return false;
+                }else{
+                    state.add(nextToken);
+                }
+            }
+        }
+        else{
+            System.out.println("Invalid State: Either 9 or 15 unique values are required in the range 0 -> 8 or 0 -> 15. Your input was " + stateRaw);
             return false;
         }
-        startState.clear();
 
-        while(tokenizer.hasMoreTokens()){
-            String nextToken = tokenizer.nextToken();
-            if(startState.contains(nextToken)){
-                System.out.println("Invalid Start State: 9 unique values are required in the range 0 -> 8. Your input was " + startStateRaw);
-                return false;
-            }else{
-                startState.add(nextToken);
-            }
-        }
-
-        //Table must be a square matrix
-        matrixDimensions = (int)Math.sqrt(startState.size());
 
         return true;
-    }
-
-    boolean GetEndState(){
-        String endStateRaw = JOptionPane.showInputDialog(f,"Enter End State");
-        StringTokenizer tokenizer = new StringTokenizer(endStateRaw, " ");
-
-        if(tokenizer.countTokens() != 9){
-            System.out.println("Invalid End State: 9 unique values are required in the range 0 -> 8. Your input was " + endStateRaw);
-            return false;
-        }
-        endState.clear();
-
-        while(tokenizer.hasMoreTokens()){
-            String nextToken = tokenizer.nextToken();
-            if(endState.contains(nextToken)){
-                System.out.println("Invalid End State: 9 unique values are required in the range 0 -> 8. Your input was " + endStateRaw);
-                return false;
-            }else{
-                endState.add(nextToken);
-            }
-        }
-
-        return true;
-    }
-
-    void ConvertListToMatrix(ArrayList<String> list, ArrayList<ArrayList<String>> matrix){
-        //Deduce the correct size of the matrix.
-        //Lists are always converted into square matrices
-        int listIndex = 0;
-        int matrixSize = (int)Math.sqrt(list.size());
-
-        for(int i = 0; i < matrixSize; i++){
-            matrix.add(new ArrayList<String>());
-            for(int j = 0; j < matrixSize; j++){
-                matrix.get(i).add(list.get(listIndex));
-
-                listIndex++;
-            }
-        }
     }
 
     //-----------------------------------------------------------------------------------------------------------
     //A* Functions-----------------------------------------------------------------------------------------------
     //-----------------------------------------------------------------------------------------------------------
+    //This will move the current blank tile left if it is a valid move and returns if it is indeed valid.
     boolean MoveLeft(ArrayList<ArrayList<String>> state, BlankTileLocation blankTileLocation){
         if(blankTileLocation.column > 0 && blankTileLocation.column < state.get(blankTileLocation.row).size()) {
             String currentElement = state.get(blankTileLocation.row).get(blankTileLocation.column);
@@ -191,6 +155,7 @@ public class Main {
         }
     }
 
+    //This will move the current blank tile right if it is a valid move and returns if it is indeed valid.
     boolean MoveRight(ArrayList<ArrayList<String>> state, BlankTileLocation blankTileLocation){
         if(blankTileLocation.column >= 0 && blankTileLocation.column < state.get(blankTileLocation.row).size()-1) {
             String currentElement = state.get(blankTileLocation.row).get(blankTileLocation.column);
@@ -205,7 +170,7 @@ public class Main {
             return false;
         }
     }
-
+    //This will move the current blank tile up if it is a valid move and returns if it is indeed valid.
     boolean MoveUp(ArrayList<ArrayList<String>> state, BlankTileLocation blankTileLocation) {
 
         if (blankTileLocation.row > 0 && blankTileLocation.row < state.size()) {
@@ -223,6 +188,7 @@ public class Main {
         }
     }
 
+    //This will move the current blank tile down if it is a valid move and returns if it is indeed valid.
     boolean MoveDown(ArrayList<ArrayList<String>> state, BlankTileLocation blankTileLocation){
 
         if(blankTileLocation.row >= 0 && blankTileLocation.row < state.size()-1) {
@@ -240,27 +206,26 @@ public class Main {
         }
     }
 
-    int ElementsOutOfPlace(ArrayList<ArrayList<String>> state){
+    //This is the heuristic used in our implementation, it simply counts how many tiles are out of place.
+    int ElementsOutOfPlace(ArrayList<ArrayList<String>> state, ArrayList<ArrayList<String>> endState){
         int elementsOutOfPlace = 0;
 
-        int endStateIndex = 0;
         for(int row = 0; row < state.size(); row++){
             for(int column = 0; column < state.get(row).size(); column++){
                 String currentStateElement = state.get(row).get(column);
-                String endStateElement = endState.get(endStateIndex);
+                String endStateElement = endState.get(row).get(column);
 
                 if(!currentStateElement.equals(endStateElement)){
                     elementsOutOfPlace++;
                 }
-                endStateIndex++;
             }
         }
 
         return elementsOutOfPlace;
     }
 
+    //This is a function which will compare each element of the matrices and determine if they identical
     boolean CompareMatrices(ArrayList<ArrayList<String>> first, ArrayList<ArrayList<String>> second){
-
         for(int row = 0; row < first.size(); row++)
         {
             for(int column = 0; column < first.get(row).size(); column++) {
@@ -273,114 +238,113 @@ public class Main {
         return true;
     }
 
-    void AStar(ArrayList<ArrayList<String>> start, ArrayList<ArrayList<String>> end){
-        //Set<Node> openList = new HashSet<Node>();
+    Stack<Node> ReconstructPath(Node endNode, Node startNode){
+        Stack<Node> path = new Stack<>();
+
+        Node currentNode = endNode;
+        path.push(currentNode);
+        while(currentNode != startNode) { //A simple address comparison is actually okay here
+            currentNode = currentNode.parent;
+            path.push(currentNode);
+        }
+        return path;
+    }
+
+    //The function which performs the A* search.
+    Stack<Node> AStar(ArrayList<ArrayList<String>> start, ArrayList<ArrayList<String>> end){
         Set<Node> closedList = new HashSet<Node>();
-        Map<Node, Integer> gScores = new HashMap<Node, Integer>();
 
         Comparator<Node> comparator = new LowestFSCoreComparator();
         PriorityQueue<Node> openList = new PriorityQueue<Node>(comparator);
 
+        //Set up the starting node.
         Node startNode = new Node();
         startNode.state = start;
         startNode.blankTileLocation.FindBlankTileLocation(start);
         startNode.g = 0;
-        startNode.h = ElementsOutOfPlace(start);
+        startNode.h = ElementsOutOfPlace(start, end);
         startNode.f = startNode.h + startNode.g;
 
-
         openList.add(startNode);
-        gScores.put(startNode, startNode.g);
 
         while(!openList.isEmpty()){
-            //Get lowest f score
             Node currentNode = openList.poll();
             closedList.add(currentNode);
-            PrintMatrix(currentNode.state);
-            System.out.println("F: " + currentNode.f);
 
-            //if end state reconstruct path
             if(CompareMatrices(currentNode.state, end))
             {
                 //We found a solution;
                 PrintMatrix(currentNode.state);
-                return;
+                return ReconstructPath(currentNode, startNode);
             }
 
-            //Get moves
+            //Get successor moves
             ArrayList<Node> successorList = new ArrayList<Node>();
 
             Node MoveLeft = new Node(currentNode);
             if(MoveLeft(MoveLeft.state, MoveLeft.blankTileLocation))
             {
-                System.out.println("Left");
-               // PrintMatrix(MoveLeft.state);
                 successorList.add(MoveLeft);
             }
 
             Node MoveRight = new Node(currentNode);
             if(MoveRight(MoveRight.state, MoveRight.blankTileLocation))
             {
-                System.out.println("Right");
-               // PrintMatrix(MoveRight.state);
                 successorList.add(MoveRight);
             }
 
             Node MoveUp = new Node(currentNode);
             if(MoveUp(MoveUp.state, MoveUp.blankTileLocation))
             {
-                System.out.println("Up");
-                //PrintMatrix(MoveUp.state);
                 successorList.add(MoveUp);
             }
 
             Node MoveDown = new Node(currentNode);
             if(MoveDown(MoveDown.state, MoveDown.blankTileLocation))
             {
-                System.out.println("Down");
-                //PrintMatrix(MoveDown.state);
                 successorList.add(MoveDown);
             }
 
-            for(int currentSuccessorIndex =  0; currentSuccessorIndex < successorList.size(); currentSuccessorIndex++){
+            //Loop through move available moves
+            for(int currentSuccessorIndex =  0; currentSuccessorIndex < successorList.size(); currentSuccessorIndex++) {
                 Node currentSuccessor = successorList.get(currentSuccessorIndex);
 
-                if(closedList.contains(currentSuccessor)){
-                    //ignore this node
-                }else{
+                if (closedList.contains(currentSuccessor)) {
+                    //ignore this node as it has already been evaluated.
+                } else {
+                    //Set G, H, F Score and set its parent
                     currentSuccessor.parent = currentNode;
                     currentSuccessor.g = currentNode.g + 1;
-                    currentSuccessor.h = ElementsOutOfPlace(currentSuccessor.state);
+                    currentSuccessor.h = ElementsOutOfPlace(currentSuccessor.state, end);
                     currentSuccessor.f = currentSuccessor.g + currentSuccessor.h;
 
-                    if(!openList.contains(currentSuccessor)){
-                        openList.add(currentSuccessor);
-                        gScores.put(currentSuccessor, currentSuccessor.g);
-                        System.out.println("Child F: " + currentSuccessor.f);
-                    }
-                    else{
-                        int g = gScores.get(currentSuccessor);
-                        if(currentSuccessor.f < g) {
-
-                            openList.remove(currentSuccessor);
-                            openList.add(currentSuccessor);
-                            gScores.put(currentSuccessor, currentSuccessor.g);
-
-                            System.out.println("Better G: " + currentSuccessor.g + " Old G: " + g);
-                        }
-                    }
+                    openList.add(currentSuccessor);
                 }
             }
-            //Loop through move available moves
-                //IF in closedList, then ignore it
+        }
 
-                //Set G, H, F Score
-                //Set its parent
-                //if not in openList then add to it
+        return new Stack<Node>(); //If no path just return an empty path.
+    }
 
+    //-----------------------------------------------------------------------------------------------------------
+    //Helper Functions-----------------------------------------------------------------------------------------------
+    //-----------------------------------------------------------------------------------------------------------
+    void ConvertListToMatrix(ArrayList<String> list, ArrayList<ArrayList<String>> matrix){
+        //Lists are always converted into square matrices
+        int listIndex = 0;
+        int matrixSize = (int)Math.sqrt(list.size());
+
+        for(int row = 0; row < matrixSize; row++){
+            matrix.add(new ArrayList<String>());
+            for(int column = 0; column < matrixSize; column++){
+                matrix.get(row).add(list.get(listIndex));
+
+                listIndex++;
+            }
         }
     }
 
+    //This hash function is extremely simple int that it just converts the matrix of numbers in a string which in turn will use the built in Java string hasher.
     String HashMatrix(ArrayList<ArrayList<String>> matrix){
         String hash = "";
 
@@ -402,30 +366,37 @@ public class Main {
             System.out.println();
         }
     }
+
     //-----------------------------------------------------------------------------------------------------------
     //Main Function----------------------------------------------------------------------------------------------
     //-----------------------------------------------------------------------------------------------------------
     public static void main(String[] args) {
-	// write your code here
         Main aStar = new Main();
-        aStar.f=new JFrame();
 
-        while(!aStar.GetStartState()){}
+        ArrayList<String> startState = new ArrayList<String>();
+        ArrayList<String> endState = new ArrayList<String>();
 
-        while(!aStar.GetEndState()){}
+        while(!aStar.GetState(startState, "Enter Start State")){}
+        while(!aStar.GetState(endState, "Enter End State")){}
 
         ArrayList<ArrayList<String>> startMatrix = new ArrayList<ArrayList<String>>();
         ArrayList<ArrayList<String>> endMatrix = new ArrayList<ArrayList<String>>();
 
-        aStar.ConvertListToMatrix(aStar.startState, startMatrix);
-        aStar.ConvertListToMatrix(aStar.endState, endMatrix);
-        aStar.PrintMatrix(startMatrix);
+        aStar.ConvertListToMatrix(startState, startMatrix);
+        aStar.ConvertListToMatrix(endState, endMatrix);
 
         System.out.println("A*");
 
-        aStar.AStar(startMatrix, endMatrix);
+        Stack<Node> path = aStar.AStar(startMatrix, endMatrix);
 
-        //System.out.println(aStar.HashMatrix(matrix));
+        int stepIndex = 1;
+        while(!path.empty()){
+            Node currentNode = path.pop();
+            System.out.println("Step " + stepIndex);
+            aStar.PrintMatrix(currentNode.state);
+
+            stepIndex++;
+        }
 
         System.out.println("Goodbye World");
     }

@@ -124,7 +124,7 @@ public class Main {
                 JOptionPane.QUESTION_MESSAGE,
                 null,
                 options,
-                optionList.get(0));
+                optionList.get(1));
 
         String opt = optionList.get(value);
         System.out.println("You picked " + opt);

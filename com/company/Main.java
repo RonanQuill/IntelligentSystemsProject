@@ -110,24 +110,28 @@ public class Main {
     //-----------------------------------------------------------------------------------------------------------
     //Input Function--------------------------------------------------------------------------------------------
     //-----------------------------------------------------------------------------------------------------------
-    boolean GetState(ArrayList<String> state, String inputMessage){
+    boolean GetState(ArrayList<String> state, String inputMessage, boolean gameType){
         List<String> optionList = new ArrayList<>();
         optionList.add("15 Puzzle");
         optionList.add("8 Puzzle");
 
         Object[] options = optionList.toArray();
-        int value = JOptionPane.showOptionDialog(
-                null,
-                "Please select a Puzzle Size",
-                "Pick",
-                JOptionPane.YES_NO_OPTION,
-                JOptionPane.QUESTION_MESSAGE,
-                null,
-                options,
-                optionList.get(1));
 
-        String opt = optionList.get(value);
-        System.out.println("You picked " + opt);
+        if (!gameType) {
+            int value = JOptionPane.showOptionDialog(
+                    null,
+                    "Please select a Puzzle Size",
+                    "Pick",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.QUESTION_MESSAGE,
+                    null,
+                    options,
+                    optionList.get(1));
+
+            String opt = optionList.get(value);
+            System.out.println("You picked " + opt);
+        }
+
 
         String stateRaw = JOptionPane.showInputDialog(jFrame, inputMessage);
         StringTokenizer tokenizer = new StringTokenizer(stateRaw, " ");
@@ -394,8 +398,8 @@ public class Main {
         ArrayList<String> startState = new ArrayList<String>();
         ArrayList<String> endState = new ArrayList<String>();
 
-        while(!aStar.GetState(startState, "Enter Start State")){}
-        while(!aStar.GetState(endState, "Enter End State")){}
+        while(!aStar.GetState(startState, "Enter Start State", false)){}
+        while(!aStar.GetState(endState, "Enter End State", true)){}
 
         ArrayList<ArrayList<String>> startMatrix = new ArrayList<ArrayList<String>>();
         ArrayList<ArrayList<String>> endMatrix = new ArrayList<ArrayList<String>>();

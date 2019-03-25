@@ -388,6 +388,45 @@ public class Main {
             System.out.println();
         }
     }
+    
+    //Takes in the start state in matrix form , finds the blank tile and fnds the possible directions the other tiles can move and prints them out.
+    void getDirections(ArrayList<ArrayList<String>> state){
+	   ArrayList<String> directions = new ArrayList<String>();
+	   String a,b,c;
+	   BlankTileLocation blankTileLocation = new BlankTileLocation();
+	   int i,j,k,l,m,n;
+	   ListIterator<String> list = directions.listIterator();
+	   k=0;
+	   l=0;
+	   blankTileLocation.FindBlankTileLocation(state);
+	   i=blankTileLocation.column;
+	   j=blankTileLocation.row;
+	   
+	   if(i++<3){
+		   a=state.get(i++).get(j);
+		   b= (a+" To the North");
+			directions.add(b);}
+			i=blankTileLocation.column;
+	   j=blankTileLocation.row;
+		if(i-->0){
+			a=state.get(i--).get(j);
+			b= (a+" To the South");
+			directions.add(b);}
+			i=blankTileLocation.column;
+	   j=blankTileLocation.row;
+		if(j++<3){
+			a=state.get(i).get(j++);
+			b=(a+" To the West");
+			directions.add(b);}
+			i=blankTileLocation.column;
+	   j=blankTileLocation.row;
+		if(j-->0){
+			a=state.get(i).get(j--);
+			b=(a+" To the East");
+			directions.add(b);}
+		for (int p = 0; p < directions.size(); p++) {
+        c = directions.get(p);
+ System.out.println(c);}}
 
     //-----------------------------------------------------------------------------------------------------------
     //Main Function----------------------------------------------------------------------------------------------
@@ -406,19 +445,21 @@ public class Main {
 
         aStar.ConvertListToMatrix(startState, startMatrix);
         aStar.ConvertListToMatrix(endState, endMatrix);
+        
+        aStar.getDirections(startMatrix);
 
         System.out.println("A*");
 
         Stack<Node> path = aStar.AStar(startMatrix, endMatrix);
 
-        int stepIndex = 1;
+       /* int stepIndex = 1;
         while(!path.empty()){
             Node currentNode = path.pop();
             System.out.println("Step " + stepIndex);
             aStar.PrintMatrix(currentNode.state);
 
             stepIndex++;
-        }
+        }*/
 
         System.out.println("Goodbye World");
     }

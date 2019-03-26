@@ -394,37 +394,29 @@ public class Main {
 	   ArrayList<String> directions = new ArrayList<String>();
 	   String a,b,c;
 	   BlankTileLocation blankTileLocation = new BlankTileLocation();
-	   int i,j,k,l,m,n;
+	   int i,j;
 	   ListIterator<String> list = directions.listIterator();
-	   k=0;
-	   l=0;
 	   blankTileLocation.FindBlankTileLocation(state);
 	   i=blankTileLocation.column;
 	   j=blankTileLocation.row;
 	   
-	   if(i++<3){
-		   a=state.get(i++).get(j);
-		   b= (a+" To the North");
-			directions.add(b);}
-			i=blankTileLocation.column;
-	   j=blankTileLocation.row;
-		if(i-->0){
-			a=state.get(i--).get(j);
-			b= (a+" To the South");
-			directions.add(b);}
-			i=blankTileLocation.column;
-	   j=blankTileLocation.row;
-		if(j++<3){
-			a=state.get(i).get(j++);
-			b=(a+" To the West");
-			directions.add(b);}
-			i=blankTileLocation.column;
-	   j=blankTileLocation.row;
-		if(j-->0){
-			a=state.get(i).get(j--);
-			b=(a+" To the East");
-			directions.add(b);}
-		for (int p = 0; p < directions.size(); p++) {
+if((i+1)<3){
+	a=state.get(j).get(i+1);
+	b= (a+" Can move West");
+	directions.add(b);}
+if((i-1)>=0){
+	a=state.get(j).get(i-1);
+	b= (a+" Can move East");
+	directions.add(b);}
+if((j+1)<3){
+	a=state.get(j+1).get(i);
+	b=(a+" Can move North");
+	directions.add(b);}
+if((j-1)>=0){
+	a=state.get(j-1).get(i);
+	b=(a+" Can move South");
+	directions.add(b);}
+for (int p = 0; p < directions.size(); p++) {
         c = directions.get(p);
  System.out.println(c);}}
 
@@ -446,12 +438,12 @@ public class Main {
         aStar.ConvertListToMatrix(startState, startMatrix);
         aStar.ConvertListToMatrix(endState, endMatrix);
         
-        aStar.getDirections(startMatrix);
+        
 
         System.out.println("A*");
 
         Stack<Node> path = aStar.AStar(startMatrix, endMatrix);
-
+	aStar.getDirections(startMatrix);
        /* int stepIndex = 1;
         while(!path.empty()){
             Node currentNode = path.pop();
@@ -462,5 +454,6 @@ public class Main {
         }*/
 
         System.out.println("Goodbye World");
+	System.exit(0);
     }
 }

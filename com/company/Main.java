@@ -136,24 +136,28 @@ public class Main {
         String stateRaw = JOptionPane.showInputDialog(jFrame, inputMessage);
         StringTokenizer tokenizer = new StringTokenizer(stateRaw, " ");
 
-        if(tokenizer.countTokens() == 9 || tokenizer.countTokens() == 16){
-            state.clear();
+        if (stateRaw.contains("0")) {
+        	if(tokenizer.countTokens() == 9 || tokenizer.countTokens() == 16){
+        		state.clear();
 
-            while(tokenizer.hasMoreTokens()){
-                String nextToken = tokenizer.nextToken();
-                if(state.contains(nextToken)){
-                    System.out.println("Invalid State: Either 9 or 15 unique values are required in the range 0 -> 8 or 0 -> 15. Your input was " + stateRaw);
-                    return false;
-                }else{
-                    state.add(nextToken);
-                }
-            }
+        		while(tokenizer.hasMoreTokens()){
+        			String nextToken = tokenizer.nextToken();
+        			if(state.contains(nextToken)){
+        				System.out.println("Invalid State: Either 9 or 15 unique values are required in the range 0 -> 8 or 0 -> 15. Your input was " + stateRaw);
+        				return false;
+        			}else{
+        				state.add(nextToken);
+        			}
+        		}
+        	}
+        	else{
+        		System.out.println("Invalid State: Either 9 or 15 unique values are required in the range 0 -> 8 or 0 -> 15. Your input was " + stateRaw);
+        		return false;
+        	}
+        } else {
+        	System.out.println("Invalid State: Either 9 or 15 unique values are required in the range 0 -> 8 or 0 -> 15. Your input was " + stateRaw);
+        	return false;
         }
-        else{
-            System.out.println("Invalid State: Either 9 or 15 unique values are required in the range 0 -> 8 or 0 -> 15. Your input was " + stateRaw);
-            return false;
-        }
-
 
         return true;
     }
@@ -449,7 +453,6 @@ for (int p = 0; p < directions.size(); p++) {
             Node currentNode = path.pop();
             System.out.println("Step " + stepIndex);
             aStar.PrintMatrix(currentNode.state);
-
             stepIndex++;
         }*/
 

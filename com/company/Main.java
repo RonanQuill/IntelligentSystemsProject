@@ -103,63 +103,82 @@ public class Main {
         @Override
         public int compare(Node x, Node y)
         {
-           return Integer.compare(x.f, y.f);
+            return Integer.compare(x.f, y.f);
         }
     }
 
+    //A simple enum to help distinguish whether we are playing the 8 puzzle or the 15 puzzle
+    enum GameType {
+        EightPuzzle,
+        FifteenPuzzle
+    }
     //-----------------------------------------------------------------------------------------------------------
-    //Input Function--------------------------------------------------------------------------------------------
+    //Input Functions--------------------------------------------------------------------------------------------
     //-----------------------------------------------------------------------------------------------------------
-    boolean GetState(ArrayList<String> state, String inputMessage, boolean gameType){
-        List<String> optionList = new ArrayList<>();
-        optionList.add("15 Puzzle");
-        optionList.add("8 Puzzle");
-
-        Object[] options = optionList.toArray();
-
-        if (!gameType) {
-            int value = JOptionPane.showOptionDialog(
-                    null,
-                    "Please select a Puzzle Size",
-                    "Pick",
-                    JOptionPane.YES_NO_OPTION,
-                    JOptionPane.QUESTION_MESSAGE,
-                    null,
-                    options,
-                    optionList.get(1));
-
-            String opt = optionList.get(value);
-            System.out.println("You picked " + opt);
-        }
-
-
+    boolean GetState(ArrayList<String> state, String inputMessage, GameType gameType){
         String stateRaw = JOptionPane.showInputDialog(jFrame, inputMessage);
         StringTokenizer tokenizer = new StringTokenizer(stateRaw, " ");
 
-        if (stateRaw.contains("0")) {
-        	if(tokenizer.countTokens() == 9 || tokenizer.countTokens() == 16){
-        		state.clear();
+        int maxRange = 8; //8 puzzle is the default option, the comparision is here anyway for completeness.
+        if(gameType == GameType.EightPuzzle){
+            maxRange = 8;
+        }
+        else if(gameType == GameType.FifteenPuzzle){
+            maxRange = 15;
+        }
 
-        		while(tokenizer.hasMoreTokens()){
-        			String nextToken = tokenizer.nextToken();
-        			if(state.contains(nextToken)){
-        				System.out.println("Invalid State: Either 9 or 15 unique values are required in the range 0 -> 8 or 0 -> 15. Your input was " + stateRaw);
-        				return false;
-        			}else{
-        				state.add(nextToken);
-        			}
-        		}
-        	}
-        	else{
-        		System.out.println("Invalid State: Either 9 or 15 unique values are required in the range 0 -> 8 or 0 -> 15. Your input was " + stateRaw);
-        		return false;
-        	}
-        } else {
-        	System.out.println("Invalid State: Either 9 or 15 unique values are required in the range 0 -> 8 or 0 -> 15. Your input was " + stateRaw);
-        	return false;
+        //Here we tokenize our input string and ensure that there are the correct amount of tokens and that they are all unique in the given range
+        if(tokenizer.countTokens() == maxRange+1){
+            state.clear();
+
+            while(tokenizer.hasMoreTokens()){
+                String nextToken = tokenizer.nextToken();
+                if(state.contains(nextToken) || (Integer.parseInt(nextToken) > maxRange && Integer.parseInt(nextToken) >= 0)){
+                    System.out.println("Invalid State: " + (maxRange+1) + " unique values are required in the range 0 -> " + maxRange + ". Your input was " + stateRaw);
+                    return false;
+                }else{
+                    state.add(nextToken);
+                }
+            }
+        }
+        else{
+            System.out.println("Invalid State: " + (maxRange+1) + " unique values are required in the range 0 -> " + maxRange + ". Your input was " + stateRaw);
+            return false;
         }
 
         return true;
+    }
+
+    //A function which displays an option dialog which allows the user to select which game type we are playing
+    GameType GetGameType(){
+        List<String> optionList = new ArrayList<>();
+
+        optionList.add("8 Puzzle");
+        optionList.add("15 Puzzle");
+
+        Object[] options = optionList.toArray();
+
+        int value = JOptionPane.showOptionDialog(
+                null,
+                "Please select a Puzzle Size",
+                "Pick",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.QUESTION_MESSAGE,
+                null,
+                options,
+                optionList.get(1));
+
+        String opt = optionList.get(value);
+        System.out.println("You picked " + opt);
+
+        if(value == 1)
+        {
+            return GameType.FifteenPuzzle;
+        }
+        else
+        {
+            return GameType.EightPuzzle;
+        }
     }
 
     //-----------------------------------------------------------------------------------------------------------
@@ -352,6 +371,45 @@ public class Main {
         return new Stack<Node>(); //If no path just return an empty path.
     }
 
+    //This is the function required for the interim submission which takes in the start state and prints the moves that are available
+    //This function has a small bit of boilerplate code along with it as it is mimicking the final submission A* function that we created
+    void GetPossibleMoves(ArrayList<ArrayList<String>> start){
+
+        //Set up the starting node.
+        Node startNode = new Node();
+        startNode.state = start;
+        startNode.blankTileLocation.FindBlankTileLocation(start);
+
+        //Get successor moves
+        Node MoveLeft = new Node(startNode);
+        if(MoveLeft(MoveLeft.state, MoveLeft.blankTileLocation))
+        {
+            String valueMoved = MoveLeft.state.get(startNode.blankTileLocation.row).get(startNode.blankTileLocation.column);
+            System.out.println(valueMoved + " to the east.");
+        }
+
+        Node MoveRight = new Node(startNode);
+        if(MoveRight(MoveRight.state, MoveRight.blankTileLocation))
+        {
+            String valueMoved = MoveRight.state.get(startNode.blankTileLocation.row).get(startNode.blankTileLocation.column);
+            System.out.println(valueMoved + " to the west.");
+        }
+
+        Node MoveUp = new Node(startNode);
+        if(MoveUp(MoveUp.state, MoveUp.blankTileLocation))
+        {
+            String valueMoved = MoveUp.state.get(startNode.blankTileLocation.row).get(startNode.blankTileLocation.column);
+            System.out.println(valueMoved + " to the south.");
+        }
+
+        Node MoveDown = new Node(startNode);
+        if(MoveDown(MoveDown.state, MoveDown.blankTileLocation))
+        {
+            String valueMoved = MoveDown.state.get(startNode.blankTileLocation.row).get(startNode.blankTileLocation.column);
+            System.out.println(valueMoved + " to the north.");
+        }
+    }
+
     //-----------------------------------------------------------------------------------------------------------
     //Helper Functions-----------------------------------------------------------------------------------------------
     //-----------------------------------------------------------------------------------------------------------
@@ -383,8 +441,8 @@ public class Main {
         return hash;
     }
 
-    void PrintMatrix(ArrayList<ArrayList<String>> matrix){
-        for(int row = 0; row < matrix.size(); row++) {
+    void PrintMatrix(ArrayList<ArrayList<String>> matrix) {
+        for (int row = 0; row < matrix.size(); row++) {
             for (int column = 0; column < matrix.get(row).size(); column++) {
                 String currentElement = matrix.get(row).get(column);
                 System.out.print(currentElement + " ");
@@ -392,37 +450,6 @@ public class Main {
             System.out.println();
         }
     }
-    
-    //Takes in the start state in matrix form , finds the blank tile and fnds the possible directions the other tiles can move and prints them out.
-    void getDirections(ArrayList<ArrayList<String>> state){
-	   ArrayList<String> directions = new ArrayList<String>();
-	   String a,b,c;
-	   BlankTileLocation blankTileLocation = new BlankTileLocation();
-	   int i,j;
-	   ListIterator<String> list = directions.listIterator();
-	   blankTileLocation.FindBlankTileLocation(state);
-	   i=blankTileLocation.column;
-	   j=blankTileLocation.row;
-	   
-if((i+1)<3){
-	a=state.get(j).get(i+1);
-	b= (a+" Can move West");
-	directions.add(b);}
-if((i-1)>=0){
-	a=state.get(j).get(i-1);
-	b= (a+" Can move East");
-	directions.add(b);}
-if((j+1)<3){
-	a=state.get(j+1).get(i);
-	b=(a+" Can move North");
-	directions.add(b);}
-if((j-1)>=0){
-	a=state.get(j-1).get(i);
-	b=(a+" Can move South");
-	directions.add(b);}
-for (int p = 0; p < directions.size(); p++) {
-        c = directions.get(p);
- System.out.println(c);}}
 
     //-----------------------------------------------------------------------------------------------------------
     //Main Function----------------------------------------------------------------------------------------------
@@ -433,22 +460,22 @@ for (int p = 0; p < directions.size(); p++) {
         ArrayList<String> startState = new ArrayList<String>();
         ArrayList<String> endState = new ArrayList<String>();
 
-        while(!aStar.GetState(startState, "Enter Start State", false)){}
-        while(!aStar.GetState(endState, "Enter End State", true)){}
+        GameType gameType = aStar.GetGameType();
+
+        while(!aStar.GetState(startState, "Enter Start State", gameType)){}
+        while(!aStar.GetState(endState, "Enter End State", gameType)){}
 
         ArrayList<ArrayList<String>> startMatrix = new ArrayList<ArrayList<String>>();
         ArrayList<ArrayList<String>> endMatrix = new ArrayList<ArrayList<String>>();
 
         aStar.ConvertListToMatrix(startState, startMatrix);
         aStar.ConvertListToMatrix(endState, endMatrix);
-        
-        
 
         System.out.println("A*");
 
-        Stack<Node> path = aStar.AStar(startMatrix, endMatrix);
-	aStar.getDirections(startMatrix);
-       /* int stepIndex = 1;
+       /* Stack<Node> path = aStar.AStar(startMatrix, endMatrix);
+
+        int stepIndex = 1;
         while(!path.empty()){
             Node currentNode = path.pop();
             System.out.println("Step " + stepIndex);
@@ -456,7 +483,9 @@ for (int p = 0; p < directions.size(); p++) {
             stepIndex++;
         }*/
 
+        aStar.GetPossibleMoves(startMatrix);
+
         System.out.println("Goodbye World");
-	System.exit(0);
+        System.exit(0);
     }
 }
